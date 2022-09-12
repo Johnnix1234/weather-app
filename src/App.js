@@ -1,38 +1,40 @@
-import Search from "./components/search/search";
-import "./App.css";
-import CurrentWeather from "./current-weather/current-weather";
-import { WEATHER_API_KEY, WEATHER_API_URL, FORECAST_API_URL } from "./api";
 import { useState } from "react";
+import Search from "./components/search/search";
+import CurrentWeather from "./components/current-weather/current-weather";
+import Forecast from "./components/forecast/forecast";
+import { WEATHER_API_URL, WEATHER_API_KEY } from "./api";
+import "./App.css";
 
 function App() {
-  const [currentWeather, setCurrentweather] = useState(null);
-  const [forecastweather, setForecastweather] = useState(null);
+  const [currentWeather, setCurrentWeather] = useState(null);
+  const [forecast, setForecast] = useState(null);
 
   const handleOnSearchChange = (searchData) => {
     const [lat, lon] = searchData.value.split(" ");
 
-    const CurrentWeatherFetch = fetch(
-      `${WEATHER_API_URL}/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}`
+    const currentWeatherFetch = fetch(
+      `${WEATHER_API_URL}/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
     );
     const forecastFetch = fetch(
-      `${FORECAST_API_URL}/forecast?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}`
+      `${WEATHER_API_URL}/forecast?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
     );
-    Promise.all([CurrentWeatherFetch, forecastFetch])
+
+    Promise.all([currentWeatherFetch, forecastFetch])
       .then(async (response) => {
         const weatherResponse = await response[0].json();
-        const forecastresponse = await response[1].json();
+        const forcastResponse = await response[1].json();
 
-        setCurrentweather({ city: searchData.label, ...weatherResponse });
-        setForecastweather({ city: searchData.label, ...forecastresponse });
+        setCurrentWeather({ city: searchData.label, ...weatherResponse });
+        setForecast({ city: searchData.label, ...forcastResponse });
       })
-      .catch((err) => console.log(err));
+      .catch(console.log);
   };
-  console.log(currentWeather);
-  console.log(forecastweather);
+
   return (
     <div className="container">
       <Search onSearchChange={handleOnSearchChange} />
       {currentWeather && <CurrentWeather data={currentWeather} />}
+      {forecast && <Forecast data={forecast} />}
     </div>
   );
 }
